@@ -3,14 +3,6 @@
 #include "Question.h"
 #include <vector>
 
-// ============================================================
-//  SORTING & SEARCHING MANUAL
-// ============================================================
-
-// ------------------------------------------------------------
-//  MERGE SORT — Urutkan leaderboard peserta by skor (descending)
-//  Big O: O(n log n) — Best, Average, Worst (guaranteed)
-// ------------------------------------------------------------
 class LeaderboardSorter {
 private:
     static void merge(vector<Participant*>& arr, int l, int m, int r) {
@@ -20,7 +12,6 @@ private:
 
         int i = 0, j = 0, k = l;
         while (i < n1 && j < n2) {
-            // Descending: skor lebih tinggi duluan
             if (L[i]->getScore() >= R[j]->getScore())
                 arr[k++] = L[i++];
             else
@@ -31,7 +22,6 @@ private:
     }
 
 public:
-    // Merge Sort rekursif
     static void mergeSort(vector<Participant*>& arr, int l, int r) {
         if (l < r) {
             int m = l + (r - l) / 2;
@@ -41,17 +31,13 @@ public:
         }
     }
 
-    // Wrapper — sort leaderboard
     static void sortLeaderboard(vector<Participant*>& participants) {
         if (participants.size() > 1)
             mergeSort(participants, 0, participants.size()-1);
     }
 };
 
-// ------------------------------------------------------------
-//  QUICK SORT — Urutkan bank soal by ID (ascending)
-//  Big O: Average O(n log n), Worst O(n²)
-// ------------------------------------------------------------
+
 class QuestionSorter {
 private:
     static int partition(vector<Question*>& arr, int low, int high) {
@@ -82,14 +68,9 @@ public:
     }
 };
 
-// ------------------------------------------------------------
-//  BINARY SEARCH — Cari soal by ID di bank soal (sudah terurut)
-//  PRASYARAT: array sudah terurut ascending by ID
-//  Big O: O(log n)
-// ------------------------------------------------------------
+
 class QuestionSearcher {
 public:
-    // Kembalikan index soal, atau -1 jika tidak ditemukan
     static int binarySearchById(const vector<Question*>& arr, int targetId) {
         int left = 0, right = arr.size() - 1;
         while (left <= right) {
@@ -101,8 +82,6 @@ public:
         return -1;
     }
 
-    // LINEAR SEARCH — Cari soal by kategori
-    // Big O: O(n)
     static vector<Question*> linearSearchByCategory(
             const vector<Question*>& arr, const string& category) {
         vector<Question*> results;
