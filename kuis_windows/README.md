@@ -1,14 +1,10 @@
-# Platform Kuis Online — Versi Windows (Winsock2)
-Tugas Akhir Algoritma dan Pemrograman | Teknik Komputer UI
+# Platform Kuis Online 
+Tugas Akhir Algoritma dan Pemrograman | Teknik Elektro UI
 
-## Perbedaan dari Versi Linux
-| Linux                  | Windows (Winsock2)         |
-|------------------------|----------------------------|
-| `#include <sys/socket>`| `#include <winsock2.h>`    |
-| `int socket_fd`        | `SOCKET socket_fd`         |
-| `close(sock)`          | `closesocket(sock)`        |
-| `g++ ... -pthread`     | `g++ ... -pthread -lws2_32`|
-| Tidak perlu init       | `WSAStartup()` wajib       |
+## Kelompok AAP
+1. Steven Ferdy Naibaho - 2506584281
+2. Aditya Yohannes Peacero Sitinjak - 2506644103
+3. Andreas Putra Nugraha Siagian - 2506644463
 
 ## Prasyarat
 Install **MinGW** atau **MSYS2** agar punya g++ di Windows:
@@ -20,24 +16,9 @@ Install **MinGW** atau **MSYS2** agar punya g++ di Windows:
 - Tambahkan `C:\msys64\mingw64\bin` ke PATH Windows
 
 ## Cara Menjalankan
-
-### Cara 1 — Double klik file .bat (Paling Mudah)
 1. Double klik `run_server.bat` → tunggu server jalan
 2. Double klik `run_client.bat` di jendela baru → ikuti kuis
 3. Untuk peserta ke-2, 3, dst → double klik `run_client.bat` lagi
-
-### Cara 2 — Manual lewat Command Prompt
-```
-# Kompilasi server
-cd server
-g++ -std=c++17 -pthread -I../common main_server.cpp -o server.exe -lws2_32
-server.exe
-
-# Kompilasi client (Command Prompt baru)
-cd client
-g++ -std=c++17 -pthread -I../common main_client.cpp -o client.exe -lws2_32
-client.exe
-```
 
 ## Struktur File
 ```
@@ -60,4 +41,3 @@ quizapp_windows/
 
 ## Akun & Soal Default
 - 9 soal: 4 Multiple Choice, 3 True/False, 2 Essay
-- Tambah soal di server/QuizServer.h → fungsi initQuestions()
