@@ -2,13 +2,10 @@
 #include "Question.h"
 #include <algorithm>
 
-// ============================================================
-//  INHERITANCE + POLIMORFISME: MultipleChoice mewarisi Question
-// ============================================================
 class MultipleChoice : public Question {
 private:
-    vector<string> choices;     // pilihan jawaban A, B, C, D
-    char           correctKey;  // 'A', 'B', 'C', atau 'D'
+    vector<string> choices;     
+    char           correctKey;  '
 
 public:
     MultipleChoice(int id, const string& text, const string& cat,
@@ -16,16 +13,13 @@ public:
         : Question(id, text, cat, pts),
           choices(opts), correctKey(toupper(correct)) {}
 
-    // POLIMORFISME: override getType
     string getType() const override { return "MultipleChoice"; }
 
-    // POLIMORFISME: override checkAnswer
     bool checkAnswer(const string& ans) const override {
         if (ans.empty()) return false;
         return toupper(ans[0]) == correctKey;
     }
 
-    // POLIMORFISME: override getChoicesText
     string getChoicesText() const override {
         string result = "";
         char label = 'A';
@@ -34,18 +28,14 @@ public:
         return result;
     }
 
-    // POLIMORFISME: override getSummary
     string getSummary() const override {
         return "[MC | " + category + " | " + to_string(points) + " pts] " + questionText;
     }
 };
 
-// ============================================================
-//  INHERITANCE: TrueFalse mewarisi Question
-// ============================================================
 class TrueFalse : public Question {
 private:
-    bool correctAnswer;   // true = Benar, false = Salah
+    bool correctAnswer;   h
 
 public:
     TrueFalse(int id, const string& text, const string& cat,
@@ -55,7 +45,6 @@ public:
     string getType() const override { return "TrueFalse"; }
 
     bool checkAnswer(const string& ans) const override {
-        // Terima: "true"/"false", "benar"/"salah", "1"/"0", "B"/"S"
         string a = ans;
         transform(a.begin(), a.end(), a.begin(), ::tolower);
         bool userAnswer = (a == "true" || a == "benar" ||
@@ -68,13 +57,10 @@ public:
     }
 };
 
-// ============================================================
-//  INHERITANCE: Essay mewarisi Question (penilaian manual)
-// ============================================================
 class Essay : public Question {
 private:
-    string keyAnswer;   // kata kunci yang harus ada di jawaban
-    int    minLength;   // panjang minimum jawaban
+    string keyAnswer;   
+    int    minLength;   
 
 public:
     Essay(int id, const string& text, const string& cat,
@@ -84,7 +70,6 @@ public:
 
     string getType() const override { return "Essay"; }
 
-    // Pengecekan sederhana: jawaban mengandung kata kunci
     bool checkAnswer(const string& ans) const override {
         if ((int)ans.size() < minLength) return false;
         string lAns = ans, lKey = keyAnswer;
