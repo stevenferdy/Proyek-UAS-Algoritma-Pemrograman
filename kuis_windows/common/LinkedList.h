@@ -2,16 +2,6 @@
 #include "Participant.h"
 #include <iostream>
 
-// ============================================================
-//  BONUS: Manual Linked List untuk daftar peserta
-//  (tanpa std::list / std::vector)
-//
-//  Big O:
-//    addParticipant    : O(1)
-//    removeParticipant : O(n)
-//    findByName        : O(n) — Linear Search
-//    findBySocket      : O(n) — Linear Search
-// ============================================================
 struct PNode {
     Participant* data;
     PNode*       next;
@@ -36,7 +26,6 @@ public:
         }
     }
 
-    // O(1) — tambah di depan list
     void addParticipant(Participant* p) {
         PNode* node = new PNode(p);
         node->next = head;
@@ -44,7 +33,6 @@ public:
         size++;
     }
 
-    // O(n) — hapus berdasarkan nama
     bool removeParticipant(const string& name) {
         PNode* cur = head, *prev = nullptr;
         while (cur) {
@@ -60,7 +48,6 @@ public:
         return false;
     }
 
-    // O(n) — LINEAR SEARCH by nama
     Participant* findByName(const string& name) const {
         PNode* cur = head;
         while (cur) {
@@ -71,7 +58,6 @@ public:
         return nullptr;
     }
 
-    // O(n) — LINEAR SEARCH by socket fd
     Participant* findBySocket(int sock) const {
         PNode* cur = head;
         while (cur) {
