@@ -1,8 +1,5 @@
 #pragma once
 
-// ============================================================
-//  WINSOCK2 — Header khusus Windows (HARUS di paling atas)
-// ============================================================
 #include <winsock2.h>
 #include <ws2tcpip.h>
 #pragma comment(lib, "ws2_32.lib")   // link otomatis di MSVC
@@ -20,23 +17,13 @@
 
 #define PORT     9090
 #define MAX_BUF  4096
-
-// ============================================================
-//  QuizServer — Versi Windows (Winsock2)
-//  Perbedaan dari Linux:
-//    - Tipe socket: SOCKET (bukan int)
-//    - Tutup socket: closesocket() (bukan close())
-//    - Inisialisasi: WSAStartup() di awal
-//    - Cleanup: WSACleanup() di akhir
-// ============================================================
 class QuizServer {
 private:
-    SOCKET            serverSocket;   // SOCKET bukan int
+    SOCKET            serverSocket;   
     vector<Question*> questionBank;
     ParticipantList   participants;
     mutex             mtx;
 
-    // ---- Isi bank soal ----
     void initQuestions() {
         questionBank.push_back(new MultipleChoice(
             1, "Apa kepanjangan dari OOP?",
@@ -89,15 +76,12 @@ private:
             "Jaringan", 20, "komunikasi", 20
         ));
 
-        // Sort bank soal by ID — Quick Sort O(n log n)
         QuestionSorter::sortById(questionBank);
         cout << "[Server] " << questionBank.size() << " soal dimuat." << endl;
     }
 
-    // ---- Kirim semua soal ke satu client ----
     void sendQuestions(SOCKET clientSock, Participant* p) {
         for (auto q : questionBank) {
-            // Bangun teks soal lengkap
             string soalText =
                 "\n================================================\n"
                 "No. " + to_string(q->getId()) +
@@ -115,7 +99,6 @@ private:
 
             send(clientSock, packet.c_str(), (int)packet.size(), 0);
 
-            // Tunggu jawaban dari client
             char buf[MAX_BUF] = {};
             int n = recv(clientSock, buf, MAX_BUF-1, 0);
             if (n <= 0) { p->setDone(true); return; }
@@ -128,7 +111,6 @@ private:
             p->recordAnswer();
             if (correct) p->addScore(q->getPoints());
 
-            // Kirim hasil per soal
             string res = JsonParser::makeResult(
                 correct ? "1" : "0",
                 correct ? to_string(q->getPoints()) : "0",
@@ -139,13 +121,11 @@ private:
         p->setDone(true);
     }
 
-    // ---- Broadcast leaderboard ke semua client ----
     void broadcastLeaderboard() {
         vector<Participant*> pVec;
         PNode* cur = participants.getHead();
         while (cur) { pVec.push_back(cur->data); cur = cur->next; }
 
-        // Sort by skor — Merge Sort O(n log n)
         LeaderboardSorter::sortLeaderboard(pVec);
 
         string board = "=== LEADERBOARD ===\n";
@@ -161,17 +141,14 @@ private:
         }
     }
 
-    // ---- Handle satu client (dijalankan di thread terpisah) ----
     void handleClient(SOCKET clientSock) {
         char buf[MAX_BUF] = {};
         int n = recv(clientSock, buf, MAX_BUF-1, 0);
-        if (n <= 0) { closesocket(clientSock); return; }  // closesocket di Windows
+        if (n <= 0) { closesocket(clientSock); return; }  
 
         auto data  = JsonParser::deserialize(string(buf));
         string name = data["name"];
 
-        // Daftarkan peserta
-        // Winsock2: SOCKET adalah unsigned int, cast ke int untuk disimpan
         Participant* p = new Participant(name, (int)clientSock);
         {
             lock_guard<mutex> lock(mtx);
@@ -185,10 +162,8 @@ private:
         ) + "\n";
         send(clientSock, notif.c_str(), (int)notif.size(), 0);
 
-        // Kirim semua soal
         sendQuestions(clientSock, p);
 
-        // Kirim hasil akhir
         string done = JsonParser::makeNotif(
             "Ujian selesai!\n"
             "Skor    : " + to_string(p->getScore()) + "\n"
@@ -206,14 +181,13 @@ private:
         cout << "[Server] " << name << " selesai. Skor: "
              << p->getScore() << endl;
 
-        closesocket(clientSock);   // Windows: closesocket()
+        closesocket(clientSock);   
     }
 
 public:
     QuizServer() : serverSocket(INVALID_SOCKET) {}
 
     void start() {
-        // ---- Inisialisasi Winsock2 (WAJIB di Windows) ----
         WSADATA wsaData;
         int wsaResult = WSAStartup(MAKEWORD(2, 2), &wsaData);
         if (wsaResult != 0) {
@@ -224,7 +198,6 @@ public:
 
         initQuestions();
 
-        // Buat socket TCP
         serverSocket = socket(AF_INET, SOCK_STREAM, 0);
         if (serverSocket == INVALID_SOCKET) {
             cerr << "[Error] Gagal membuat socket." << endl;
@@ -232,12 +205,10 @@ public:
             return;
         }
 
-        // Agar port bisa langsung dipakai ulang
         int opt = 1;
         setsockopt(serverSocket, SOL_SOCKET, SO_REUSEADDR,
                    (const char*)&opt, sizeof(opt));
 
-        // Bind ke port
         sockaddr_in addr{};
         addr.sin_family      = AF_INET;
         addr.sin_addr.s_addr = INADDR_ANY;
@@ -260,7 +231,6 @@ public:
             SOCKET clientSock = accept(serverSocket, (sockaddr*)&cAddr, &cLen);
             if (clientSock == INVALID_SOCKET) continue;
 
-            // BONUS MULTITHREADING: spawn thread per peserta
             thread t(&QuizServer::handleClient, this, clientSock);
             t.detach();
         }
@@ -270,6 +240,6 @@ public:
         for (auto q : questionBank) delete q;
         if (serverSocket != INVALID_SOCKET)
             closesocket(serverSocket);
-        WSACleanup();   // Wajib dipanggil di akhir program
+        WSACleanup();   
     }
 };
