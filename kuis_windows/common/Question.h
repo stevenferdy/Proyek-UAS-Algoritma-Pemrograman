@@ -10,6 +10,7 @@ protected:
     string category;
     int    points;      
 
+
 public:
     Question(int id, const string& text, const string& cat, int pts)
         : id(id), questionText(text), category(cat), points(pts) {}
